@@ -2,217 +2,220 @@
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace Blackjack
-
 {
-
-    class game
-
+    class Hand
     {
-        static void Main(string[] args)
+        public List<Card> Cards = new List<Card>();
+
+
+        public int TotalValue()
         {
-            while (playAgain == "Yes")
+            var total = 0;
+
+            foreach (var card in Cards)
             {
-                StartGame();
-                CreateDeck();
-                StartGameLoop();
-                Console.WriteLine("Would you like to play again? Yes or No?");
-                PlayAgain();
+                total = total + card.Value();
             }
-        }
-        public List<string> Deck = new List<string>();
-        static string[] playerCards = new string[11];
 
-        static string[] dealerCards = new string[11];
-
-        static string playerChoice = "";
-
-        static int playerTotal = 0;
-
-        static int cardCount = 1;
-
-        static int dealerTotal = 0;
-
-        static Random cardRandomizer = new Random();
-
-        static string playAgain = "Yes";
-
-        static void StartGame()
-        {
-            playerCards[0] = DealCard();
-            playerCards[1] = DealCard();
-            dealerCards[0] = DealCard();
-            dealerCards[1] = DealCard();
-            DisplayWelcomeMessage();
+            return total;
         }
 
-        public static void DisplayWelcomeMessage()
+
+        public bool Busted()
         {
-            Console.WriteLine("Game start! You were dealt the cards : {0} and {1} ", playerCards[0], playerCards[1]);
-            Console.WriteLine("Your Score is {0} ", playerTotal);
-            Console.WriteLine("The dealer's first card is {0}.", dealerCards[0]);
+            if (TotalValue() > 21)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        static void StartGameLoop()
-
+        public void Display()
         {
-            do
+            foreach (var card in Cards)
             {
-                Console.WriteLine("Would you like to Hit or Stand?");
-                playerChoice = Console.ReadLine();
+                Console.WriteLine($"The {card.Face} of {card.Suit}");
             }
-            while (!playerChoice.Equals("Hit") && !playerChoice.Equals("Stand"));
-            if (playerChoice.Equals("Hit"))
-            {
-                Hit();
-            }
-            if (playerChoice.Equals("Stand"))
-            {
-                if (playerTotal > dealerTotal && playerTotal <= 21)
-                {
-                    Console.WriteLine("You Win!");
-                }
-                else if (playerTotal < dealerTotal)
-                {
-                    Console.WriteLine("You Lost.");
-                }
+            Console.WriteLine($"The total is: {TotalValue()}");
+            Console.WriteLine();
+        }
+        public void AddCardToHand(Card cardToAdd)
+        {
+            Cards.Add(cardToAdd);
+        }
+    }
 
+    class Card
+    {
+        public string Face { get; set; }
+        public string Suit { get; set; }
+        public int Value()
+        {
+            var answer = 0;
+
+            switch (Face)
+            {
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                case "10":
+                    answer = int.Parse(Face);
+                    break;
+
+                case "J":
+                case "Q":
+                case "K":
+                    answer = 10;
+                    break;
+
+                case "A":
+                    answer = 11;
+                    break;
             }
 
+            return answer;
+        }
+    }
+
+    class Deck
+    {
+        public List<Card> CardsInDeck = new List<Card>();
+
+        public Card DealCard()
+        {
+            var topCard = CardsInDeck[0];
+            CardsInDeck.Remove(topCard);
+
+            return topCard;
         }
 
-        static void Hit()
+
+
+
+        public void MakesNewShuffledCards()
         {
-            cardCount += 1;
-            playerCards[cardCount] = DealCard();
-            dealerCards[cardCount] = DealCard();
-            Console.WriteLine("You were dealt {0}. Your hand's score is {1}. ", playerCards[cardCount], playerTotal);
-            if (playerTotal.Equals(21))
+            var suits = new List<string>() { "Club", "Diamond", "Heart", "Spade" };
+
+
+            var faces = new List<string>() { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
+
+
+            foreach (var suit in suits)
             {
-                Console.WriteLine("Blackjack!");
-            }
-            else if (playerTotal > 21)
-            {
-                Console.WriteLine("Busted!");
-            }
-            else if (playerTotal < 21)
-            {
-                do
-                {
-                    Console.WriteLine("Hit or Stand?");
-                    playerChoice = Console.ReadLine();
-                }
-                while (!playerChoice.Equals("Hit") && !playerChoice.Equals("Stand"));
-                if (playerChoice == "Hit")
-                {
-                    Hit();
-                }
-                if (playerChoice == "Stand")
-                {
-                    dealerCards[2] = DealCard();
-                    Console.WriteLine("The dealer was dealt: {0}.", dealerCards[2]);
-                }
-                if (dealerTotal < 17)
-                {
-                    dealerCards[4] = DealCard();
-                }
-                else if (playerTotal <= dealerTotal)
-                {
-                    Console.WriteLine("House Wins.");
-                }
-                else if (dealerTotal > 21)
-                {
-                    Console.WriteLine("House busted! You Win!");
-                }
-                else if (playerTotal > dealerTotal && playerTotal <= 21)
-                {
-                    Console.WriteLine("You Win!");
-                }
 
-
-            }
-        }
-        public void CreateDeck()
-        {
-            List<string> values = new List<string>() { "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace" };
-
-            List<string> suits = new List<string>()
-        { "Spades", "Diamonds", "Hearts","Clubs"};
-
-            foreach (string value in values)
-            {
-                foreach (string suit in suits)
                 {
-                    Deck.Add($"{value} of {suit}");
+                    foreach (var face in faces)
+
+                    {
+                        var ourCard = new Card()
+                        {
+                            Face = face,
+                            Suit = suit,
+                        };
+
+                        CardsInDeck.Add(ourCard);
+                    }
                 }
-                int n = Deck.Count;
-                for (int rightIndex = n - 1; rightIndex > 1; rightIndex--)
+                var n = CardsInDeck.Count();
+
+                for (var rightIndex = n - 1; rightIndex >= 1; rightIndex--)
                 {
-
-
-                    int leftIndex = cardRandomizer.Next(rightIndex);
-                    var leftCard = Deck[rightIndex];
-                    var rightCard = Deck[leftIndex];
-                    Deck[rightIndex] = rightCard;
-                    Deck[leftIndex] = leftCard;
-
+                    var randomNumberGenerator = new Random();
+                    var leftIndex = randomNumberGenerator.Next(rightIndex);
+                    var leftCard = CardsInDeck[rightIndex];
+                    var rightCard = CardsInDeck[leftIndex];
+                    CardsInDeck[rightIndex] = rightCard;
+                    CardsInDeck[leftIndex] = leftCard;
                 }
             }
         }
 
-        public int DealCard()
+        class Program
         {
-            int value = 0;
-            int randomCard = cardRandomizer.Next(Deck.Count);
-            string card = Deck[randomCard];
-            Deck.RemoveAt(randomCard);
-            if (card[0] == '2' || card[0] == '3' || card[0] == '4' || card[0] == '5' ||
-                card[0] == '6' || card[0] == '7' || card[0] == '8' || card[0] == '9')
+            static void Main(string[] args)
             {
-                value = int.Parse(card[0].ToString());
-            }
 
-            else if (card[0] == '1' || card[0] == 'J' || card[0] == 'Q' || card[0] == 'K')
-            {
-                value = 10;
-            }
+                var playAgain = "YES";
 
-            else if (card[0] == 'A')
-            {
-                value = 11;
-            }
-            return value;
+                while (playAgain.ToUpper() == "YES")
+                {
+                    var deck = new Deck();
+                    deck.MakesNewShuffledCards();
+                    var player = new Hand();
+                    var dealer = new Hand();
+                    for (var count = 0; count < 2; count++)
+                    {
+                        player.AddCardToHand(deck.DealCard());
+                    }
 
-        }
+                    for (var count = 0; count < 2; count++)
+                    {
+                        dealer.AddCardToHand(deck.DealCard());
+                    }
+                    var choice = "";
+                    while (choice != "STAND" && !player.Busted())
+                    {
+                        Console.WriteLine("------- PLAYER ------");
+                        player.Display();
+                        Console.WriteLine();
+                        Console.Write("HIT or STAND? ");
+                        choice = Console.ReadLine();
+                        if (choice == "HIT")
+                        {
+                            player.AddCardToHand(deck.DealCard());
 
-        static void PlayAgain()
-        {
-            do
-            {
-                playAgain = Console.ReadLine();
 
-            }
-            while (!playAgain.Equals("Yes") && !playAgain.Equals("No"));
-            if (playAgain.Equals("Yes"))
-            {
-                Console.WriteLine("Press enter to restart the game!");
-                Console.ReadLine();
-                Console.Clear();
-                dealerTotal = 0;
-                cardCount = 1;
-                playerTotal = 0;
-            }
-            else if (playAgain.Equals("No"))
-            {
-                return;
+                        }
+                    }
+
+                    Console.WriteLine("------- PLAYER ------");
+                    player.Display();
+                    while (!player.Busted() && dealer.TotalValue() < 17)
+                    {
+                        dealer.AddCardToHand(deck.DealCard());
+                    }
+
+                    Console.WriteLine("------- DEALER ------");
+                    dealer.Display();
+
+                    if (player.Busted())
+                    {
+                        Console.WriteLine("Dealer wins!");
+                    }
+                    else
+                    {
+                        if (dealer.Busted())
+
+                        {
+                            Console.WriteLine("Player wins");
+                        }
+                        else
+                        {
+                            if (player.TotalValue() > dealer.TotalValue())
+                            {
+                                Console.WriteLine("Player wins");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Tie goes to the dealer");
+                            }
+                        }
+                    }
+
+                    Console.WriteLine();
+                    Console.Write("Play again? YES or NO? ");
+                    playAgain = Console.ReadLine();
+                }
             }
         }
     }
 }
-
-
-
-
-
-
